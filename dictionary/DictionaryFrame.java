@@ -2,11 +2,14 @@ package maman14.dictionary;
 
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
+import javax.swing.table.TableColumn;
 import javax.swing.table.TableModel;
+import javax.swing.table.TableRowSorter;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
+import java.net.URL;
 
 public class DictionaryFrame extends JFrame {
 
@@ -24,6 +27,9 @@ public class DictionaryFrame extends JFrame {
             public void actionPerformed(ActionEvent e) {
                 JFileChooser fileChooser = new JFileChooser();
                 fileChooser.setDialogTitle("Open Dictionary From File");
+                URL url = getClass().getResource("dictionary_sample.ayal");
+                File file = new File(url.getPath());
+                fileChooser.setCurrentDirectory(file.getParentFile());
                 int userSelection = fileChooser.showOpenDialog(DictionaryFrame.this);
                 if (userSelection == JFileChooser.APPROVE_OPTION) {
                     File fileToSave = fileChooser.getSelectedFile();
@@ -37,6 +43,9 @@ public class DictionaryFrame extends JFrame {
             @Override
             public void actionPerformed(ActionEvent e) {
                 JFileChooser fileChooser = new JFileChooser();
+                URL url = getClass().getResource("dictionary_sample.ayal");
+                File file = new File(url.getPath());
+                fileChooser.setCurrentDirectory(file.getParentFile());
                 fileChooser.setDialogTitle("Save Dictionary To File");
                 int userSelection = fileChooser.showSaveDialog(DictionaryFrame.this);
                 if (userSelection == JFileChooser.APPROVE_OPTION) {
@@ -50,7 +59,6 @@ public class DictionaryFrame extends JFrame {
         buttonsPanel.add(btnSaveAs);
         add(buttonsPanel, BorderLayout.NORTH);
 
-        JPanel tablePanel = new JPanel();
         m_tableModel = new DefaultTableModel() {
             @Override
             public int getRowCount() {
@@ -80,27 +88,33 @@ public class DictionaryFrame extends JFrame {
             }
         };
         m_table = new JTable(m_tableModel);
+        m_table.setAutoResizeMode(JTable.AUTO_RESIZE_SUBSEQUENT_COLUMNS);
+        m_table.setShowGrid(true);
+        TableRowSorter<TableModel> sorter = new TableRowSorter<TableModel>(m_table.getModel());
+        sorter.setSortable(0, true);
+        m_table.setRowSorter(sorter);
         JScrollPane scrollPane = new JScrollPane(m_table);
-        m_table.setFillsViewportHeight(true);
+        DefaultTableModel model = (DefaultTableModel) m_table.getModel();
+        //model.addRow(new Object[]{"Column 1", "Column 2"});        //m_table.setFillsViewportHeight(true);
+        //m_table.getColumnModel().getColumn(0).setPreferredWidth(50);
+        //m_table.getColumnModel().getColumn(1).setPreferredWidth(300);
 
-        //scrollPane.setLayout(new BorderLayout());
-        //scrollPane.add(table.getTableHeader(), BorderLayout.PAGE_START);
-        //scrollPane.add(table, BorderLayout.CENTER);
 
-        //tablePanel.add(table);
         add(scrollPane, BorderLayout.CENTER);
 
         setSize(Constants.WINDOW_WIDTH_PIXELS,Constants.WINDOW_HEIGHT_PIXELS);
         setVisible(true);
-        //setResizable(false);
+        setResizable(false);
+
+        URL url = getClass().getResource("dictionary_sample.ayal");
+        File file = new File(url.getPath());
+        loadTable(file);
     }
 
     public void loadTable(File file) {
         m_fileManager.loadTable(file, m_tableModel);
-        //m_tableModel.setValueAt("ayal", 1, 1);
         m_tableModel.fireTableDataChanged();
         m_table.revalidate();
-        //m_table = new JTable(m_tableModel);
         repaint();
     }
 
