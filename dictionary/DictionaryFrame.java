@@ -17,6 +17,7 @@ public class DictionaryFrame extends JFrame {
     private JTable m_table;
     private DefaultTableModel m_tableModel;
     private String m_currentFile = "No File Opened";
+    private JTextField m_textFieldSearch;
 
     public DictionaryFrame() {
         super("My Dictionary");
@@ -77,10 +78,23 @@ public class DictionaryFrame extends JFrame {
                 //repaint();
             }
         });
+
+        JButton btnSearch = new JButton("Search Word");
+        btnSearch.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                search();
+            }
+        });
+        m_textFieldSearch = new JTextField("[Enter search word here]");
+        m_textFieldSearch.setBackground(Color.YELLOW);
+
         buttonsPanel.add((btnOpenFile));
         buttonsPanel.add(btnSaveAs);
         buttonsPanel.add(btnAddEntry);
         buttonsPanel.add(btnRemoveEntry);
+        buttonsPanel.add(m_textFieldSearch);
+        buttonsPanel.add(btnSearch);
         add(buttonsPanel, BorderLayout.NORTH);
 
         m_tableModel = new DefaultTableModel() {
@@ -138,6 +152,16 @@ public class DictionaryFrame extends JFrame {
         sorter.setSortKeys(sortKeys);
     }
 
+    private void search() {
+        String wordToSearch = m_textFieldSearch.getText();
+        if (wordToSearch == null) return;
+        for (int i=0; i< m_table.getRowCount(); i++) {
+            if (m_table.getValueAt(i, 0).equals(wordToSearch)) {
+                m_table.setRowSelectionInterval(i,i);
+            }
+        }
+    }
+
     public void loadTable(File file) {
         m_fileManager.loadTable(file, m_tableModel);
         m_tableModel.fireTableDataChanged();
@@ -169,7 +193,19 @@ public class DictionaryFrame extends JFrame {
         DefaultTableModel model = (DefaultTableModel) m_table.getModel();
         int[] rows = table.getSelectedRows();
         for(int i=0;i<rows.length;i++){
-            model.removeRow(rows[i]-i);
+            int rowToRemove = rows[i] - i;
+            String word = (String)table.getValueAt(rowToRemove, 0);
+            int modelRowToRemove = -1;
+            for (int j=0; j< model.getRowCount(); j++)
+            {
+                if (model.getValueAt(j, 0).equals(word))
+                {
+                    modelRowToRemove = j;
+                }
+            }
+            if (modelRowToRemove != -1) {
+                model.removeRow(modelRowToRemove);
+            }
         }
         repaint();
     }
