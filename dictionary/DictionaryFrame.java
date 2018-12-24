@@ -13,12 +13,37 @@ import java.util.ArrayList;
 
 public class DictionaryFrame extends JFrame {
 
+    /**
+     * FileManager object is responsible of loading\saving the dictionary.
+     */
     private FileManager m_fileManager = new FileManager();
+
+    /**
+     * The UI representation of the dictionary, a table with 2 columns:
+     * Column 0 is 'Word'
+     * Column 1 is 'Meaning'
+     * The JTable is backed by a TableModel with the logical data representation.
+     */
     private JTable m_table;
+
+    /**
+     * The logical table
+     */
     private DefaultTableModel m_tableModel;
+
+    /**
+     * Assumption: Zero or one file is open at every given moment.
+     */
     private String m_currentFile = "No File Opened";
+
+    /**
+     * Search string
+     */
     private JTextField m_textFieldSearch;
 
+    /**
+     * Constructor
+     */
     public DictionaryFrame() {
         super("My Dictionary");
 
@@ -98,10 +123,6 @@ public class DictionaryFrame extends JFrame {
         add(buttonsPanel, BorderLayout.NORTH);
 
         m_tableModel = new DefaultTableModel() {
-            //@Override
-            //public int getRowCount() {
-            //    return 10;
-            //}
 
             @Override
             public int getColumnCount() {
@@ -142,6 +163,9 @@ public class DictionaryFrame extends JFrame {
 
         }
 
+    /**
+     * Repaint includes sorting the displayed table
+     */
     @Override
     public void repaint() {
         TableRowSorter<TableModel> sorter = new TableRowSorter<TableModel>(m_table.getModel());
@@ -152,6 +176,9 @@ public class DictionaryFrame extends JFrame {
         sorter.setSortKeys(sortKeys);
     }
 
+    /**
+     * Select the row containing the word in the search bar
+     */
     private void search() {
         String wordToSearch = m_textFieldSearch.getText();
         if (wordToSearch == null) return;
@@ -162,6 +189,10 @@ public class DictionaryFrame extends JFrame {
         }
     }
 
+    /**
+     * Load file and repaint the displayed table
+     * @param file
+     */
     public void loadTable(File file) {
         m_fileManager.loadTable(file, m_tableModel);
         m_tableModel.fireTableDataChanged();
@@ -171,6 +202,10 @@ public class DictionaryFrame extends JFrame {
         repaint();
     }
 
+    /**
+     * Save the table into file
+     * @param file
+     */
     public void saveTableToFile(File file) {
         m_fileManager.saveTable(m_tableModel, file);
         m_currentFile = file.getAbsolutePath();
@@ -178,6 +213,10 @@ public class DictionaryFrame extends JFrame {
         repaint();
     }
 
+    /**
+     * Duplicate words are allowed temporarily on screen, however they will not be allowed to be saved.
+     * @return the first duplicate word, or null if there are no duplicates.
+     */
     private String checkForDuplicateKeys() {
         for (int i=0; i<m_table.getRowCount(); i++) {
             for (int j=0; j<m_table.getRowCount(); j++) {
@@ -189,6 +228,10 @@ public class DictionaryFrame extends JFrame {
         return null;
     }
 
+    /**
+     * Remove the words selected by the user (supports multiple rows)
+     * @param table
+     */
     public void removeSelectedRows(JTable table){
         DefaultTableModel model = (DefaultTableModel) m_table.getModel();
         int[] rows = table.getSelectedRows();
